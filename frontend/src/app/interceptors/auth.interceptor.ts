@@ -1,0 +1,12 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+
+// Angular 20 functional interceptor — auto-attaches JWT to every request
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    return next(req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    }));
+  }
+  return next(req);
+};

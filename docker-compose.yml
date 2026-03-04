@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: rarp_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB:       rarp_apartment
+      POSTGRES_USER:     apartment_user
+      POSTGRES_PASSWORD: apartment_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apartment_user -d rarp_apartment"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Flask Backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rarp_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://apartment_user:apartment_pass@db:5432/rarp_apartment
+      JWT_SECRET_KEY: supersecretjwtkey2026
+      FLASK_ENV: production
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+
+  # ── Angular Frontend (nginx) ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: rarp_frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
