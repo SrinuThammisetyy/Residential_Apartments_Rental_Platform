@@ -1,7 +1,13 @@
 from app import create_app, db
 from app.models import User, Tower, Unit, Amenity, unit_amenities
 import bcrypt
+import os
+import os
 
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL',
+    'postgresql://apartment_user:apartment_pass@localhost:5432/rarp_apartment'
+)
 app = create_app()
 
 def seed_data():
