@@ -1,4 +1,3 @@
-# ── Flask Backend ──────────────────────────────────────────────────────────
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -11,12 +10,13 @@ RUN apt-get update && apt-get install -y \
 
 # Copy and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy application code
+# Copy app code
 COPY . .
 
+# Expose port
 EXPOSE 5000
 
-# Run with gunicorn in production
+# Run the app
 CMD ["python", "run.py"]
